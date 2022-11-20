@@ -8,10 +8,20 @@
     <script type="module" src="./index.js"></script>
   </head>
   <body>
-    <input type="text" id="search-box" />
-    <!-- <ul class="country-list"></ul>
-    <div class="country-info"></div> -->
+    <form class="search-form" id="search-form">
+      <input
+        type="text"
+        name="searchQuery"
+        autocomplete="off"
+        placeholder="Search images..."
+      />
+      <button type="submit" class="js-button-search">Search</button>
+    </form>
+
+    <div class="gallery"></div>
+    <button type="button" class="load-more">Load more</button>
 
     <script src="index.js" type="module"></script>
+    <!-- <script src="./js/example.js" type="module"></script> -->
   </body>
 </html>
