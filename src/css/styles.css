@@ -60,6 +60,12 @@ body {
 button,
 input {
   display: block;
+  height: 35px;
+  border-radius: 15px;
+  text-align: center;
+}
+button:hover {
+  cursor: pointer;
 }
 
 .search-form {
@@ -67,12 +73,16 @@ input {
   justify-content: center;
   padding: 8px;
   margin-bottom: 24px;
+  align-items: center;
+  background-color: rgb(98, 124, 220);
+  height: 70px;
 }
 
 .load-more {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: 10px;
 }
 .info p {
   display: flex;

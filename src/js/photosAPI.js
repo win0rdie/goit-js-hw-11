@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const BASE_URL = 'https://pixabay.com/api/';
 const API_KEY = '31415914-2ac89ac673c071c72663449a1';
 
@@ -6,7 +8,7 @@ export class PhotosAPI {
   static currentPage = 1;
   static query = '';
 
-  static getAllPhotos(query) {
+  static async getAllPhotos(query) {
     if (query !== undefined) {
       PhotosAPI.query = query;
       PhotosAPI.currentPage = 1;
@@ -24,8 +26,8 @@ export class PhotosAPI {
       page: PhotosAPI.currentPage,
     });
 
-    return fetch(`${BASE_URL}?${searchParams}`).then(response =>
-      response.json()
-    );
+    return await axios
+      .get(`${BASE_URL}?${searchParams}`)
+      .then(response => response.data);
   }
 }

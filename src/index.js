@@ -19,9 +19,9 @@ let lightbox = new SimpleLightbox('.gallery .photo-card a', {
   captions: true,
 });
 
-btnLoadMoreEl.disabled = true;
+btnLoadMoreEl.style.visibility = 'hidden';
 
-function createForm(e) {
+async function createForm(e) {
   e.preventDefault();
   const query = e.target.elements.searchQuery.value.trim();
 
@@ -29,41 +29,42 @@ function createForm(e) {
     return;
   }
 
-  PhotosAPI.getAllPhotos(query).then(data => {
-    PhotosAPI.totalHits = data.totalHits;
-
-    if (data.totalHits > 40) {
-      btnLoadMoreEl.disabled = false;
+  const response = await PhotosAPI.getAllPhotos(query);
+  PhotosAPI.totalHits = response.totalHits;
+  try {
+    if (response.totalHits > 40) {
+      btnLoadMoreEl.style.visibility = 'visible';
     }
 
-    if (data.totalHits > 0) {
-      Notify.success(`"Hooray! We found ${data.totalHits} images."`);
+    if (response.totalHits > 0) {
+      Notify.success(`"Hooray! We found ${response.totalHits} images."`);
       galleryEl.innerHTML = '';
-      renderMarkup(data.hits);
+      renderMarkup(response.hits);
       lightbox.refresh();
     }
 
-    if (data.totalHits === 0) {
+    if (response.totalHits === 0) {
       Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
       galleryEl.innerHTML = '';
     }
-  });
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function handleBtnLoadMore() {
-  PhotosAPI.getAllPhotos().then(data => {
-    renderMarkup(data.hits);
-    lightbox.refresh();
-    handleScroll();
-    if (data.hits.length < 40 || data.hits.length === 0) {
-      btnLoadMoreEl.disabled = true;
-      Notify.warning(
-        "We're sorry, but you've reached the end of search results."
-      );
-    }
-  });
+async function handleBtnLoadMore() {
+  const response = await PhotosAPI.getAllPhotos();
+  renderMarkup(response.hits);
+  lightbox.refresh();
+  handleScroll();
+  if (response.hits.length < 40 || response.hits.length === 0) {
+    btnLoadMoreEl.style.visibility = 'hidden';
+    Notify.warning(
+      "We're sorry, but you've reached the end of search results."
+    );
+  }
 }
 
 formEl.addEventListener('submit', createForm);
