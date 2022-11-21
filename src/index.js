@@ -34,10 +34,6 @@ function createForm(e) {
 
     if (data.totalHits > 40) {
       btnLoadMoreEl.disabled = false;
-    } else {
-      Notify.failure(
-        "We're sorry, but you've reached the end of search results."
-      );
     }
 
     if (data.totalHits > 0) {
