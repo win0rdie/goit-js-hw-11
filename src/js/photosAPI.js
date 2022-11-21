@@ -17,7 +17,7 @@ export class PhotosAPI {
     const searchParams = new URLSearchParams({
       key: API_KEY,
       q: PhotosAPI.query,
-      per_page: 100,
+      per_page: 40,
       image_type: 'photo',
       orientation: 'horizontal',
       safesearch: true,

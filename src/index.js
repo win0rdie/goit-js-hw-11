@@ -3,11 +3,21 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import axios from 'axios';
 import { PhotosAPI } from './js/photosAPI';
+import { handleScroll } from './js/scrolling';
+import { renderMarkup } from './js/renderPhotos';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-const formEl = document.querySelector('.search-form');
-const searchBtnEl = document.querySelector('.js-button-search');
-const galleryEl = document.querySelector('.gallery');
-const btnLoadMoreEl = document.querySelector('.load-more');
+export const { formEl, galleryEl, btnLoadMoreEl } = {
+  formEl: document.querySelector('.search-form'),
+  galleryEl: document.querySelector('.gallery'),
+  btnLoadMoreEl: document.querySelector('.load-more'),
+};
+
+let lightbox = new SimpleLightbox('.photo-card a', {
+  captionDelay: 250,
+  captionsData: 'alt',
+  captions: true,
+});
 
 btnLoadMoreEl.disabled = true;
 // searchBtnEl.addEventListener('submit', handleSearch);
@@ -17,60 +27,43 @@ formEl.addEventListener('submit', e => {
   const query = e.target.elements.searchQuery.value;
 
   PhotosAPI.getAllPhotos(query).then(data => {
+    console.log('ourrr data', data);
+
     PhotosAPI.totalHits = data.totalHits;
+
+    // якшо не ввести нічого все одно приходить масив об'єктів
+    if (query === '' || data.totalHits === []) {
+      console.log(
+        Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        )
+      );
+    }
+
+    if (data.totalHits > 0) {
+      Notify.success(`"Hooray! We found ${data.totalHits} images."`);
+      lightbox.refresh();
+    }
+
     galleryEl.innerHTML = '';
     renderMarkup(data.hits);
-    if (data.totalHits > 1) {
+
+    if (data.totalHits > 40) {
       btnLoadMoreEl.disabled = false;
+    } else {
+      Notify.failure(
+        "We're sorry, but you've reached the end of search results."
+      );
     }
   });
 });
 
-function renderMarkup(hits) {
-  const markup = hits
-    .map(
-      ({
-        webformatURL,
-        largeImageURL,
-        tags,
-        likes,
-        views,
-        comments,
-        downloads,
-      }) => {
-        return `
-          <div class="photo-card">
-          <a href="${largeImageURL}" >
-            <img src="${webformatURL}" alt="${tags}" loading="lazy" />
-          </a>
-          <div class="info">
-            <p class="info-item">
-              <b>${likes}</b>
-            </p>
-            <p class="info-item">
-              <b>${views}</b>
-            </p>
-            <p class="info-item">
-              <b>${comments}</b>
-            </p>
-            <p class="info-item">
-              <b>${downloads}</b>
-            </p>
-          </div>
-          </div>
-          `;
-      }
-    )
-    .join('');
-  galleryEl.insertAdjacentHTML('beforeend', markup);
-}
-
 btnLoadMoreEl.addEventListener('click', () => {
   PhotosAPI.getAllPhotos().then(data => {
     renderMarkup(data.hits);
-
-    console.log(data);
-    if (data.hits.length < 40 && data.hits.length === 0) {
+    lightbox.refresh();
+    handleScroll();
+    if (data.hits.length < 40 || data.hits.length === 0) {
       btnLoadMoreEl.disabled = true;
       console.log("We're sorry, but you've reached the end of search results.");
     }

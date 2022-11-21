@@ -64,11 +64,11 @@
 //   });
 // };
 
-fetch('https://jsonplaceholder.typicode.com/posts')
-  .then(response => response.json())
-  .then(posts => {
-    for (const post of posts) {
-      let div = document.createElement('div');
-      div.innerText = `${post.id} ${post.title}`;
-    }
-  });
+// fetch('https://jsonplaceholder.typicode.com/posts')
+//   .then(response => response.json())
+//   .then(posts => {
+//     for (const post of posts) {
+//       let div = document.createElement('div');
+//       div.innerText = `${post.id} ${post.title}`;
+//     }
+//   });
