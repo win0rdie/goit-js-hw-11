@@ -13,40 +13,24 @@ export const { formEl, galleryEl, btnLoadMoreEl } = {
   btnLoadMoreEl: document.querySelector('.load-more'),
 };
 
-let lightbox = new SimpleLightbox('.photo-card a', {
+let lightbox = new SimpleLightbox('.gallery .photo-card a', {
   captionDelay: 250,
   captionsData: 'alt',
   captions: true,
 });
 
 btnLoadMoreEl.disabled = true;
-// searchBtnEl.addEventListener('submit', handleSearch);
 
-formEl.addEventListener('submit', e => {
+function createForm(e) {
   e.preventDefault();
-  const query = e.target.elements.searchQuery.value;
+  const query = e.target.elements.searchQuery.value.trim();
+
+  if (query === '') {
+    return;
+  }
 
   PhotosAPI.getAllPhotos(query).then(data => {
-    console.log('ourrr data', data);
-
     PhotosAPI.totalHits = data.totalHits;
-
-    // якшо не ввести нічого все одно приходить масив об'єктів
-    if (query === '' || data.totalHits === []) {
-      console.log(
-        Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        )
-      );
-    }
-
-    if (data.totalHits > 0) {
-      Notify.success(`"Hooray! We found ${data.totalHits} images."`);
-      lightbox.refresh();
-    }
-
-    galleryEl.innerHTML = '';
-    renderMarkup(data.hits);
 
     if (data.totalHits > 40) {
       btnLoadMoreEl.disabled = false;
@@ -55,17 +39,36 @@ formEl.addEventListener('submit', e => {
         "We're sorry, but you've reached the end of search results."
       );
     }
-  });
-});
 
-btnLoadMoreEl.addEventListener('click', () => {
+    if (data.totalHits > 0) {
+      Notify.success(`"Hooray! We found ${data.totalHits} images."`);
+      galleryEl.innerHTML = '';
+      renderMarkup(data.hits);
+      lightbox.refresh();
+    }
+
+    if (data.totalHits === 0) {
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+      galleryEl.innerHTML = '';
+    }
+  });
+}
+
+function handleBtnLoadMore() {
   PhotosAPI.getAllPhotos().then(data => {
     renderMarkup(data.hits);
     lightbox.refresh();
     handleScroll();
     if (data.hits.length < 40 || data.hits.length === 0) {
       btnLoadMoreEl.disabled = true;
-      console.log("We're sorry, but you've reached the end of search results.");
+      Notify.warning(
+        "We're sorry, but you've reached the end of search results."
+      );
     }
   });
-});
+}
+
+formEl.addEventListener('submit', createForm);
+btnLoadMoreEl.addEventListener('click', handleBtnLoadMore);
